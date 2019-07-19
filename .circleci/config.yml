@@ -15,12 +15,6 @@ jobs:
 
     # install dependencies
     - run: yarn --frozen-lockfile
-
-    # tries to persist distribution libs to workspace
-    - persist_to_workspace:
-        root: ~/repo
-        paths:
-        - node_modules
       
     # build distribution folder
     - run: yarn build
@@ -29,6 +23,7 @@ jobs:
     - persist_to_workspace:
         root: ~/repo
         paths:
+        - node_modules
         - build
 
   test:
