@@ -2,7 +2,7 @@
   "name": "events-timeline",
   "version": "0.0.1-a",
   "private": true,
-  "description": "A sisngle page application with the single purpose of showing Tron Blockchain events in a timeline.",
+  "description": "A single page application with the single purpose of showing Tron Blockchain events in a timeline.",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
