@@ -1,0 +1,84 @@
+---
+version: 2
+jobs:
+  build:
+    docker:
+    - image: circleci/node:10
+      environment:
+        GENERATE_SOURCEMAP: "false"
+        NODE_ENV: "production"
+        PUBLIC_URL: "/"
+    working_directory: ~/repo
+
+    steps:
+    - checkout
+
+    # install dependencies
+    - run: yarn --frozen-lockfile
+
+    # tries to persist distribution libs to workspace
+    - persist_to_workspace:
+        root: ~/repo
+        paths:
+        - node_modules
+      
+    # build distribution folder
+    - run: yarn build
+
+    # tries to persist distribution libs to workspace
+    - persist_to_workspace:
+        root: ~/repo
+        paths:
+        - build
+
+  test:
+    docker:
+    - image: circleci/node:10
+    working_directory: ~/repo
+
+    steps:
+    - checkout
+
+    # tries to restore distribution folder from workspace
+    - attach_workspace:
+        at: ~/repo
+
+    - run: yarn lint
+
+  deploy-develop:
+    docker:
+    - image: circleci/node:10
+    working_directory: ~/repo
+
+    steps:
+    - checkout
+    
+    # tries to restore distribution folder from workspace
+    - attach_workspace:
+        at: ~/repo
+
+    # installs surge globally
+    - run: yarn global add surge
+
+    # deploy to surge
+    - run: |
+        export PATH=$PATH:$(yarn global bin)
+        export DOMAIN=https://events-timeline-develop.surge.sh
+        surge teardown $DOMAIN
+        surge ./build $DOMAIN
+
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+    - build
+    - test:
+        requires:
+        - build
+    - deploy-development:
+        requires:
+        - test
+        filters:
+          branches:
+            only:
+            - develop
